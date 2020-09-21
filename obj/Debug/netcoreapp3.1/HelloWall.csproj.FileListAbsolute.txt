@@ -1,0 +1,13 @@
+C:\Users\chris\documents\github\HelloWall\bin\Debug\netcoreapp3.1\HelloWall.exe
+C:\Users\chris\documents\github\HelloWall\bin\Debug\netcoreapp3.1\HelloWall.deps.json
+C:\Users\chris\documents\github\HelloWall\bin\Debug\netcoreapp3.1\HelloWall.runtimeconfig.json
+C:\Users\chris\documents\github\HelloWall\bin\Debug\netcoreapp3.1\HelloWall.runtimeconfig.dev.json
+C:\Users\chris\documents\github\HelloWall\bin\Debug\netcoreapp3.1\HelloWall.dll
+C:\Users\chris\documents\github\HelloWall\bin\Debug\netcoreapp3.1\HelloWall.pdb
+C:\Users\chris\documents\github\HelloWall\obj\Debug\netcoreapp3.1\HelloWall.csprojAssemblyReference.cache
+C:\Users\chris\documents\github\HelloWall\obj\Debug\netcoreapp3.1\HelloWall.AssemblyInfoInputs.cache
+C:\Users\chris\documents\github\HelloWall\obj\Debug\netcoreapp3.1\HelloWall.AssemblyInfo.cs
+C:\Users\chris\documents\github\HelloWall\obj\Debug\netcoreapp3.1\HelloWall.csproj.CoreCompileInputs.cache
+C:\Users\chris\documents\github\HelloWall\obj\Debug\netcoreapp3.1\HelloWall.dll
+C:\Users\chris\documents\github\HelloWall\obj\Debug\netcoreapp3.1\HelloWall.pdb
+C:\Users\chris\documents\github\HelloWall\obj\Debug\netcoreapp3.1\HelloWall.genruntimeconfig.cache
