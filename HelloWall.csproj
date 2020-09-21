@@ -6,7 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Xbim.Common" Version="5.1.297" />
     <PackageReference Include="Xbim.Essentials" Version="5.1.297" />
+    <PackageReference Include="Xbim.Ifc" Version="5.1.297" />
+    <PackageReference Include="Xbim.Ifc2x3" Version="5.1.297" />
+    <PackageReference Include="Xbim.Ifc4" Version="5.1.297" />
+    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.1.297" />
+    <PackageReference Include="Xbim.Tessellator" Version="5.1.297" />
   </ItemGroup>
 
 </Project>

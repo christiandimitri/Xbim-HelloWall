@@ -38,7 +38,31 @@
       "frameworks": {
         "netcoreapp3.1": {
           "dependencies": {
+            "Xbim.Common": {
+              "target": "Package",
+              "version": "[5.1.297, )"
+            },
             "Xbim.Essentials": {
+              "target": "Package",
+              "version": "[5.1.297, )"
+            },
+            "Xbim.IO.MemoryModel": {
+              "target": "Package",
+              "version": "[5.1.297, )"
+            },
+            "Xbim.Ifc": {
+              "target": "Package",
+              "version": "[5.1.297, )"
+            },
+            "Xbim.Ifc2x3": {
+              "target": "Package",
+              "version": "[5.1.297, )"
+            },
+            "Xbim.Ifc4": {
+              "target": "Package",
+              "version": "[5.1.297, )"
+            },
+            "Xbim.Tessellator": {
               "target": "Package",
               "version": "[5.1.297, )"
             }
