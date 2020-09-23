@@ -1,12 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xbim.Common;
 using Xbim.Common.Step21;
 using Xbim.Ifc;
+using Xbim.Ifc2x3.ActorResource;
+using Xbim.Ifc2x3.ExternalReferenceResource;
 using Xbim.Ifc2x3.GeometricConstraintResource;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Ifc2x3.Interfaces;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.MaterialResource;
 using Xbim.Ifc2x3.MeasureResource;
@@ -14,14 +16,17 @@ using Xbim.Ifc2x3.PresentationOrganizationResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.ProfileResource;
 using Xbim.Ifc2x3.PropertyResource;
+using Xbim.Ifc2x3.QuantityResource;
 using Xbim.Ifc2x3.RepresentationResource;
 using Xbim.Ifc2x3.SharedBldgElements;
+using Xbim.Ifc2x3.TimeSeriesResource;
 
 namespace HelloWall
 {
     class HelloWall
     {
         public static void InitiateModel()
+
         {
             Console.WriteLine("Hello Wall");
             var editor = new XbimEditorCredentials
@@ -173,15 +178,318 @@ namespace HelloWall
                     shape2D.Items.Add(ifcPolyline);
                     rep.Representations.Add(shape2D);
                     txn.Commit();
+                    // / <summary>
+                    /// Add some properties to the wall,
+                    // / </summary>
+                    // / <param name="model">XbimModel</param>
+                    // / <param name="wall"></param>
+                    AddPropertyToWall(model, wall);
                 }
-
-
-
-
 
                 //save your changed model. IfcStore will use the extension to save it as *.ifc, *.ifczip or *.ifcxml.
                 model.SaveAs("HelloWall.ifc");
             }
+        }
+        static private void AddPropertyToWall(IfcStore model, IfcWallStandardCase wall)
+        {
+            using (var txn = model.BeginTransaction("Create Wall"))
+            {
+                CreateElementQuantity(model, wall);
+                CreateSimpleProperty(model, wall);
+                txn.Commit();
+            }
+        }
+        private static void CreateSimpleProperty(IfcStore model, IfcWallStandardCase wall)
+        {
+            var ifcPropertySingleValue = model.Instances.New<IfcPropertySingleValue>(psv =>
+            {
+                psv.Name = "IfcPropertySingleValue:Time";
+                psv.Description = "";
+                psv.NominalValue = new IfcTimeMeasure(150.0);
+                psv.Unit = model.Instances.New<IfcSIUnit>(siu =>
+                {
+                    siu.UnitType = IfcUnitEnum.TIMEUNIT;
+                    siu.Name = IfcSIUnitName.SECOND;
+                });
+            });
+            var ifcPropertyEnumeratedValue = model.Instances.New<IfcPropertyEnumeratedValue>(pev =>
+            {
+                pev.Name = "IfcPropertyEnumeratedValue:Music";
+                pev.EnumerationReference = model.Instances.New<IfcPropertyEnumeration>(pe =>
+                    {
+                        pe.Name = "Notes";
+                        pe.EnumerationValues.Add(new IfcLabel("Do"));
+                        pe.EnumerationValues.Add(new IfcLabel("Re"));
+                        pe.EnumerationValues.Add(new IfcLabel("Mi"));
+                        pe.EnumerationValues.Add(new IfcLabel("Fa"));
+                        pe.EnumerationValues.Add(new IfcLabel("So"));
+                        pe.EnumerationValues.Add(new IfcLabel("La"));
+                        pe.EnumerationValues.Add(new IfcLabel("Ti"));
+                    });
+                pev.EnumerationValues.Add(new IfcLabel("Do"));
+                pev.EnumerationValues.Add(new IfcLabel("Re"));
+                pev.EnumerationValues.Add(new IfcLabel("Mi"));
+
+            });
+            var ifcPropertyBoundedValue = model.Instances.New<IfcPropertyBoundedValue>(pbv =>
+            {
+                pbv.Name = "IfcPropertyBoundedValue:Mass";
+                pbv.Description = "";
+                pbv.UpperBoundValue = new IfcMassMeasure(5000.0);
+                pbv.LowerBoundValue = new IfcMassMeasure(1000.0);
+                pbv.Unit = model.Instances.New<IfcSIUnit>(siu =>
+                {
+                    siu.UnitType = IfcUnitEnum.MASSUNIT;
+                    siu.Name = IfcSIUnitName.GRAM;
+                    siu.Prefix = IfcSIPrefix.KILO;
+                });
+            });
+
+            var definingValues = new List<IfcReal> { new IfcReal(100.0), new IfcReal(200.0), new IfcReal(400.0), new IfcReal(800.0), new IfcReal(1600.0), new IfcReal(3200.0), };
+            var definedValues = new List<IfcReal> { new IfcReal(20.0), new IfcReal(42.0), new IfcReal(46.0), new IfcReal(56.0), new IfcReal(60.0), new IfcReal(65.0), };
+            var ifcPropertyTableValue = model.Instances.New<IfcPropertyTableValue>(ptv =>
+            {
+                ptv.Name = "IfcPropertyTableValue:Sound";
+                foreach (var item in definingValues)
+                {
+                    ptv.DefiningValues.Add(item);
+                }
+                foreach (var item in definedValues)
+                {
+                    ptv.DefinedValues.Add(item);
+                }
+                ptv.DefinedUnit = model.Instances.New<IfcContextDependentUnit>(cd =>
+                {
+                    cd.Dimensions = model.Instances.New<IfcDimensionalExponents>(de =>
+                    {
+                        de.LengthExponent = 0;
+                        de.MassExponent = 0;
+                        de.TimeExponent = 0;
+                        de.ElectricCurrentExponent = 0;
+                        de.ThermodynamicTemperatureExponent = 0;
+                        de.AmountOfSubstanceExponent = 0;
+                        de.LuminousIntensityExponent = 0;
+                    });
+                    cd.UnitType = IfcUnitEnum.FREQUENCYUNIT;
+                    cd.Name = "dB";
+                });
+
+
+            });
+
+            var listValues = new List<IfcLabel> { new IfcLabel("Red"), new IfcLabel("Green"), new IfcLabel("Blue"), new IfcLabel("Pink"), new IfcLabel("White"), new IfcLabel("Black"), };
+            var ifcPropertyListValue = model.Instances.New<IfcPropertyListValue>(plv =>
+            {
+                plv.Name = "IfcPropertyListValue:Colours";
+                foreach (var item in listValues)
+                {
+                    plv.ListValues.Add(item);
+                }
+            });
+
+            var ifcMaterial = model.Instances.New<IfcMaterial>(m =>
+            {
+                m.Name = "Brick";
+            });
+            var ifcPrValueMaterial = model.Instances.New<IfcPropertyReferenceValue>(prv =>
+            {
+                prv.Name = "IfcPropertyReferenceValue:Material";
+                prv.PropertyReference = ifcMaterial;
+            });
+
+
+            var ifcMaterialList = model.Instances.New<IfcMaterialList>(ml =>
+                {
+                    ml.Materials.Add(ifcMaterial);
+                    ml.Materials.Add(model.Instances.New<IfcMaterial>(m => { m.Name = "Cavity"; }));
+                    ml.Materials.Add(model.Instances.New<IfcMaterial>(m => { m.Name = "Block"; }));
+                });
+
+
+            var ifcMaterialLayer = model.Instances.New<IfcMaterialLayer>(ml =>
+            {
+                ml.Material = ifcMaterial;
+                ml.LayerThickness = 100.0;
+            });
+            var ifcPrValueMatLayer = model.Instances.New<IfcPropertyReferenceValue>(prv =>
+            {
+                prv.Name = "IfcPropertyReferenceValue:MaterialLayer";
+                prv.PropertyReference = ifcMaterialLayer;
+            });
+
+            var ifcDocumentReference = model.Instances.New<IfcDocumentReference>(dr =>
+            {
+                dr.Name = "Document";
+                dr.Location = "c://Documents//TheDoc.Txt";
+            });
+            var ifcPrValueRef = model.Instances.New<IfcPropertyReferenceValue>(prv =>
+            {
+                prv.Name = "IfcPropertyReferenceValue:Document";
+                prv.PropertyReference = ifcDocumentReference;
+            });
+
+            var ifcTimeSeries = model.Instances.New<IfcRegularTimeSeries>(ts =>
+            {
+                ts.Name = "Regular Time Series";
+                ts.Description = "Time series of events";
+                ts.TimeSeriesDataType = IfcTimeSeriesDataTypeEnum.CONTINUOUS;
+                ts.DataOrigin = IfcDataOriginEnum.MEASURED;
+                ts.TimeStep = 604800; //7 days in secs
+            });
+
+            var ifcPrValueTimeSeries = model.Instances.New<IfcPropertyReferenceValue>(prv =>
+            {
+                prv.Name = "IfcPropertyReferenceValue:TimeSeries";
+                prv.PropertyReference = ifcTimeSeries;
+            });
+
+            var ifcAddress = model.Instances.New<IfcPostalAddress>(a =>
+            {
+                a.InternalLocation = "Room 101";
+                a.AddressLines.AddRange(new[] { new IfcLabel("12 New road"), new IfcLabel("DoxField") });
+                a.Town = "Sunderland";
+                a.PostalCode = "DL01 6SX";
+            });
+            var ifcPrValueAddress = model.Instances.New<IfcPropertyReferenceValue>(prv =>
+            {
+                prv.Name = "IfcPropertyReferenceValue:Address";
+                prv.PropertyReference = ifcAddress;
+            });
+            var ifcTelecomAddress = model.Instances.New<IfcTelecomAddress>(a =>
+            {
+                a.TelephoneNumbers.Add(new IfcLabel("01325 6589965"));
+                a.ElectronicMailAddresses.Add(new IfcLabel("bob@bobsworks.com"));
+            });
+            var ifcPrValueTelecom = model.Instances.New<IfcPropertyReferenceValue>(prv =>
+            {
+                prv.Name = "IfcPropertyReferenceValue:Telecom";
+                prv.PropertyReference = ifcTelecomAddress;
+            });
+
+
+
+            //lets create the IfcElementQuantity
+            var ifcPropertySet = model.Instances.New<IfcPropertySet>(ps =>
+            {
+                ps.Name = "Test:IfcPropertySet";
+                ps.Description = "Property Set";
+                ps.HasProperties.Add(ifcPropertySingleValue);
+                ps.HasProperties.Add(ifcPropertyEnumeratedValue);
+                ps.HasProperties.Add(ifcPropertyBoundedValue);
+                ps.HasProperties.Add(ifcPropertyTableValue);
+                ps.HasProperties.Add(ifcPropertyListValue);
+                ps.HasProperties.Add(ifcPrValueMaterial);
+                ps.HasProperties.Add(ifcPrValueMatLayer);
+                ps.HasProperties.Add(ifcPrValueRef);
+                ps.HasProperties.Add(ifcPrValueTimeSeries);
+                ps.HasProperties.Add(ifcPrValueAddress);
+                ps.HasProperties.Add(ifcPrValueTelecom);
+            });
+
+            //need to create the relationship
+            model.Instances.New<IfcRelDefinesByProperties>(rdbp =>
+            {
+                rdbp.Name = "Property Association";
+                rdbp.Description = "IfcPropertySet associated to wall";
+                rdbp.RelatedObjects.Add(wall);
+                rdbp.RelatingPropertyDefinition = ifcPropertySet;
+            });
+        }
+
+        private static void CreateElementQuantity(IfcStore model, IfcWallStandardCase wall)
+        {
+            //Create a IfcElementQuantity
+            //first we need a IfcPhysicalSimpleQuantity,first will use IfcQuantityLength
+            var ifcQuantityArea = model.Instances.New<IfcQuantityLength>(qa =>
+            {
+                qa.Name = "IfcQuantityArea:Area";
+                qa.Description = "";
+                qa.Unit = model.Instances.New<IfcSIUnit>(siu =>
+                {
+                    siu.UnitType = IfcUnitEnum.LENGTHUNIT;
+                    siu.Prefix = IfcSIPrefix.MILLI;
+                    siu.Name = IfcSIUnitName.METRE;
+                });
+                qa.LengthValue = 100.0;
+
+            });
+            //next quantity IfcQuantityCount using IfcContextDependentUnit
+            var ifcContextDependentUnit = model.Instances.New<IfcContextDependentUnit>(cd =>
+                {
+                    cd.Dimensions = model.Instances.New<IfcDimensionalExponents>(de =>
+                        {
+                            de.LengthExponent = 1;
+                            de.MassExponent = 0;
+                            de.TimeExponent = 0;
+                            de.ElectricCurrentExponent = 0;
+                            de.ThermodynamicTemperatureExponent = 0;
+                            de.AmountOfSubstanceExponent = 0;
+                            de.LuminousIntensityExponent = 0;
+                        });
+                    cd.UnitType = IfcUnitEnum.LENGTHUNIT;
+                    cd.Name = "Elephants";
+                });
+            var ifcQuantityCount = model.Instances.New<IfcQuantityCount>(qc =>
+            {
+                qc.Name = "IfcQuantityCount:Elephant";
+                qc.CountValue = 12;
+                qc.Unit = ifcContextDependentUnit;
+            });
+
+
+            //next quantity IfcQuantityLength using IfcConversionBasedUnit
+            var ifcConversionBasedUnit = model.Instances.New<IfcConversionBasedUnit>(cbu =>
+            {
+                cbu.ConversionFactor = model.Instances.New<IfcMeasureWithUnit>(mu =>
+                {
+                    mu.ValueComponent = new IfcRatioMeasure(25.4);
+                    mu.UnitComponent = model.Instances.New<IfcSIUnit>(siu =>
+                    {
+                        siu.UnitType = IfcUnitEnum.LENGTHUNIT;
+                        siu.Prefix = IfcSIPrefix.MILLI;
+                        siu.Name = IfcSIUnitName.METRE;
+                    });
+
+                });
+                cbu.Dimensions = model.Instances.New<IfcDimensionalExponents>(de =>
+                {
+                    de.LengthExponent = 1;
+                    de.MassExponent = 0;
+                    de.TimeExponent = 0;
+                    de.ElectricCurrentExponent = 0;
+                    de.ThermodynamicTemperatureExponent = 0;
+                    de.AmountOfSubstanceExponent = 0;
+                    de.LuminousIntensityExponent = 0;
+                });
+                cbu.UnitType = IfcUnitEnum.LENGTHUNIT;
+                cbu.Name = "Inch";
+            });
+            var ifcQuantityLength = model.Instances.New<IfcQuantityLength>(qa =>
+            {
+                qa.Name = "IfcQuantityLength:Length";
+                qa.Description = "";
+                qa.Unit = ifcConversionBasedUnit;
+                qa.LengthValue = 24.0;
+            });
+
+            //lets create the IfcElementQuantity
+            var ifcElementQuantity = model.Instances.New<IfcElementQuantity>(eq =>
+            {
+                eq.Name = "Test:IfcElementQuantity";
+                eq.Description = "Measurement quantity";
+                eq.Quantities.Add(ifcQuantityArea);
+                eq.Quantities.Add(ifcQuantityCount);
+                eq.Quantities.Add(ifcQuantityLength);
+            });
+
+            //need to create the relationship
+            model.Instances.New<IfcRelDefinesByProperties>(rdbp =>
+            {
+                rdbp.Name = "Area Association";
+                rdbp.Description = "IfcElementQuantity associated to wall";
+                rdbp.RelatedObjects.Add(wall);
+                rdbp.RelatingPropertyDefinition = ifcElementQuantity;
+            });
         }
     }
 }
