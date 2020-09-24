@@ -28,7 +28,6 @@ namespace HelloWall
         public static void InitiateModel()
 
         {
-            Console.WriteLine("Hello Wall");
             var editor = new XbimEditorCredentials
             {
                 ApplicationDevelopersName = "Christian Dimitri",
